@@ -1,0 +1,163 @@
+/* CategorySelector - Pill/Pastilla Style UI */
+
+.category-selector {
+    flex-shrink: 0;
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+}
+
+.category-selector__chips {
+    display: flex;
+    gap: 0.625rem;
+    padding: 0.875rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.category-selector__chips::-webkit-scrollbar {
+    display: none;
+}
+
+/* Category Chip - Pill Style */
+.category-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    border-radius: 9999px;
+    background: transparent;
+    border: 2px solid #475569;
+    color: #94a3b8;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.category-chip:active {
+    transform: scale(0.96);
+}
+
+/* Active State - Solid fill */
+.category-chip.active {
+    background: var(--chip-color, #3b82f6);
+    border-color: var(--chip-color, #3b82f6);
+    color: #ffffff;
+    box-shadow: 0 0 12px color-mix(in srgb, var(--chip-color, #3b82f6) 40%, transparent);
+}
+
+.category-chip__name {
+    line-height: 1;
+}
+
+.category-chip__badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+.category-chip.active .category-chip__badge {
+    background: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+
+/* Add Button - Dashed pill */
+.category-chip--add {
+    background: transparent;
+    border: 2px dashed #475569;
+    color: #64748b;
+}
+
+.category-chip--add:hover,
+.category-chip--add:active {
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
+
+.category-chip__icon {
+    font-size: 1.125rem;
+    line-height: 1;
+    font-weight: 400;
+}
+
+/* Add Form */
+.category-add-form {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.category-add-input {
+    width: 110px;
+    padding: 0.625rem 0.875rem;
+    border-radius: 9999px;
+    background: #0f172a;
+    border: 2px solid #3b82f6;
+    color: #f8fafc;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    outline: none;
+}
+
+.category-add-input::placeholder {
+    color: #64748b;
+}
+
+.category-add-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.category-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.category-add-btn--confirm {
+    background: #22c55e;
+    color: #ffffff;
+}
+
+.category-add-btn--confirm:active {
+    background: #16a34a;
+    transform: scale(0.95);
+}
+
+.category-add-btn--cancel {
+    background: #475569;
+    color: #f8fafc;
+}
+
+.category-add-btn--cancel:active {
+    background: #334155;
+    transform: scale(0.95);
+}
+
+/* Error Message */
+.category-selector__error {
+    padding: 0.5rem 0.875rem;
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    font-size: 0.75rem;
+    text-align: center;
+    border-top: 1px solid rgba(239, 68, 68, 0.2);
+}

@@ -1,0 +1,185 @@
+/* WeighingScreen - Main Container Layout */
+
+.weighing-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #0f172a;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Tab Navigation */
+.weighing-screen__tabs {
+    display: flex;
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+    flex-shrink: 0;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.75rem;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn.active {
+    color: #f8fafc;
+    background: rgba(59, 130, 246, 0.1);
+    border-bottom-color: #3b82f6;
+}
+
+.tab-btn:not(.active):active {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Display Area */
+.weighing-screen__display {
+    flex-shrink: 0;
+    height: 25%;
+    min-height: 100px;
+}
+
+/* Progress Indicator */
+.weighing-screen__progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #1e293b;
+    border-bottom: 1px solid #334155;
+    flex-shrink: 0;
+}
+
+.progress-bar {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.progress-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #334155;
+    border: 2px solid #475569;
+    transition: all 0.2s ease;
+}
+
+.progress-dot.filled {
+    background: var(--progress-color, #10b981);
+    border-color: var(--progress-color, #10b981);
+}
+
+.progress-dot.current {
+    border-color: var(--progress-color, #3b82f6);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--progress-color, #3b82f6) 50%, transparent);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+.progress-text {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* Keypad Area */
+.weighing-screen__keypad {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* History View */
+.weighing-screen__history {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* Quick Stats Footer */
+.weighing-screen__quick-stats {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem;
+    background: linear-gradient(90deg, #1e40af 0%, #3b82f6 100%);
+    color: #ffffff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+.weighing-screen__quick-stats:active {
+    opacity: 0.9;
+}
+
+.quick-stats__arrow {
+    font-size: 1rem;
+}
+
+/* Legacy styles kept for backwards compatibility */
+.weighing-screen__last-entry {
+    padding: 0.5rem 1rem;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+    font-size: 0.875rem;
+    text-align: center;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.weighing-screen__last-entry strong {
+    font-weight: 700;
+}
+
+/* Adjust for landscape on short screens */
+@media (orientation: landscape) and (max-height: 500px) {
+    .weighing-screen__display {
+        height: 20%;
+        min-height: 80px;
+    }
+
+    .weighing-screen__progress {
+        padding: 0.5rem;
+    }
+
+    .progress-dot {
+        width: 10px;
+        height: 10px;
+    }
+}
+
+/* Desktop/Tablet optimization */
+@media (min-width: 768px) {
+    .weighing-screen {
+        max-width: 500px;
+        margin: 0 auto;
+        border-left: 1px solid #334155;
+        border-right: 1px solid #334155;
+    }
+}

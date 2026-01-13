@@ -1,0 +1,266 @@
+/* BatchList - Industrial Batch History Display */
+
+.batch-list {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #0f172a;
+    overflow: hidden;
+}
+
+/* Category Header */
+.batch-list__category-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.625rem;
+    background: color-mix(in srgb, var(--category-color) 15%, #1e293b);
+    border-bottom: 2px solid var(--category-color);
+    flex-shrink: 0;
+}
+
+.category-header__name {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--category-color);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+/* Empty State */
+.batch-list__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    opacity: 0.4;
+}
+
+.empty-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.empty-hint {
+    font-size: 0.8rem;
+    color: #475569;
+}
+
+/* Summary Header */
+.batch-list__summary {
+    display: flex;
+    justify-content: space-around;
+    padding: 0.875rem;
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border-bottom: 1px solid #334155;
+    flex-shrink: 0;
+}
+
+.summary-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.summary-label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.summary-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #f8fafc;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+}
+
+/* Batch Items Container */
+.batch-list__items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Individual Batch Item with zebra striping */
+.batch-item {
+    background: #1e293b;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #334155;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Zebra striping */
+.batch-item:nth-child(even) {
+    background: #1a2744;
+}
+
+.batch-item--closed {
+    border-color: #22c55e;
+}
+
+.batch-item--open {
+    border-color: #3b82f6;
+    border-style: dashed;
+}
+
+/* Batch Header */
+.batch-item__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.625rem 0.875rem;
+    background: rgba(0, 0, 0, 0.25);
+}
+
+.batch-item__status {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+.batch-item--closed .batch-item__status {
+    color: #22c55e;
+}
+
+.batch-item--open .batch-item__status {
+    color: #60a5fa;
+}
+
+/* Subtotal emphasized with accent color */
+.batch-item__subtotal {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #3b82f6;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+/* Weight Entries Grid */
+.batch-item__entries {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    padding: 0.625rem;
+}
+
+/* Individual Weight Entry with fade-in animation */
+.weight-entry {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    background: #334155;
+    border-radius: 6px;
+    min-height: 52px;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.weight-entry--empty {
+    background: #1e293b;
+    border: 1px dashed #334155;
+    animation: none;
+}
+
+.weight-entry__index {
+    font-size: 0.625rem;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 2px;
+}
+
+.weight-entry__value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #f8fafc;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+}
+
+.weight-entry__unit {
+    font-size: 0.5rem;
+    color: #64748b;
+}
+
+.weight-entry__placeholder {
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+/* Large Subtotal Bar */
+.batch-item__total-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem;
+    background: linear-gradient(90deg, #16a34a 0%, #22c55e 100%);
+}
+
+.total-bar__label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.total-bar__value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #ffffff;
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.total-bar__unit {
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Dark scrollbar styling */
+.batch-list__items::-webkit-scrollbar {
+    width: 6px;
+}
+
+.batch-list__items::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+.batch-list__items::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 3px;
+}
+
+.batch-list__items::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}

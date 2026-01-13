@@ -1,0 +1,84 @@
+/* BigDisplay - Industrial LCD Weight Visualizer */
+
+.big-display {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    height: 100%;
+    background: #000000;
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8);
+    border-bottom: 3px solid #3b82f6;
+    padding: 1rem 1.5rem;
+    user-select: none;
+    position: relative;
+}
+
+/* Ready indicator glow */
+.big-display::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #3b82f6, #22c55e, #3b82f6);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+}
+
+.big-display__label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    margin-bottom: 0.25rem;
+    text-align: right;
+}
+
+.big-display__value-container {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.big-display__value {
+    font-family: 'Roboto Mono', 'Consolas', 'Courier New', monospace;
+    font-size: clamp(4rem, 15vw, 7rem);
+    font-weight: 700;
+    color: #22c55e;
+    line-height: 1;
+    text-shadow:
+        0 0 10px rgba(34, 197, 94, 0.6),
+        0 0 30px rgba(34, 197, 94, 0.3),
+        0 0 50px rgba(34, 197, 94, 0.1);
+    min-width: 3ch;
+    text-align: right;
+    letter-spacing: -0.02em;
+}
+
+.big-display__unit {
+    font-family: 'Roboto Mono', monospace;
+    font-size: clamp(1.25rem, 4vw, 2rem);
+    font-weight: 500;
+    color: #64748b;
+    text-transform: lowercase;
+    padding-bottom: 0.5rem;
+}
+
+/* Scanline effect for retro LCD feel */
+.big-display::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(0deg,
+            rgba(0, 0, 0, 0.05) 0px,
+            rgba(0, 0, 0, 0.05) 1px,
+            transparent 1px,
+            transparent 2px);
+    pointer-events: none;
+}
