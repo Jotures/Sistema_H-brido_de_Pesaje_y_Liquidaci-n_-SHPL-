@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/Sistema_H-brido_de_Pesaje_y_Liquidaci-n_-SHPL-/sw.js', { scope: '/Sistema_H-brido_de_Pesaje_y_Liquidaci-n_-SHPL-/' })})}
