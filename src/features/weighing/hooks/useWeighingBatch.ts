@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { Batch, WeightEntry, Category } from '../../../types/domain';
 import { BATCH_SIZE, DEFAULT_CATEGORY, CATEGORY_COLORS, generateId } from '../../../types/domain';
+import { safeSum } from '../../../utils/math';
 
 // ============================================
 // localStorage Keys
@@ -52,10 +53,11 @@ const createNewBatch = (entityId: string, categoryId: string): Batch => ({
 });
 
 /**
- * Calculate the sum of all entries in a batch
+ * Calculate the sum of all entries in a batch using safe math
+ * Prevents floating-point errors (e.g., 0.1 + 0.2 = 0.30000000000000004)
  */
 const calculateSubtotal = (entries: WeightEntry[]): number => {
-    return entries.reduce((sum, entry) => sum + entry.value, 0);
+    return safeSum(entries.map(e => e.value));
 };
 
 /**

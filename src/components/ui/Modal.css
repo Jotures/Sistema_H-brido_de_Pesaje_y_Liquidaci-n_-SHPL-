@@ -1,0 +1,217 @@
+/* ===================================
+   Modal - Industrial Dark Mode Theme
+   =================================== */
+
+/* Backdrop */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: modal-backdrop-fade-in 0.2s ease-out;
+}
+
+@keyframes modal-backdrop-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Modal Container */
+.modal-container {
+    background: var(--bg-panel, #1e293b);
+    border-radius: 12px;
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+    max-width: 400px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modal-scale-in 0.2s ease-out;
+}
+
+@keyframes modal-scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Modal Header */
+.modal-header {
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid var(--border-color, #334155);
+}
+
+.modal-title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary, #f8fafc);
+}
+
+/* Modal Body */
+.modal-body {
+    padding: 1rem 1.5rem;
+}
+
+.modal-message {
+    margin: 0;
+    color: var(--text-secondary, #94a3b8);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+}
+
+/* Modal Footer / Actions */
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem 1.25rem;
+    justify-content: flex-end;
+}
+
+/* Modal Buttons - Touch Friendly (min 44px) */
+.modal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    min-height: 44px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex: 1;
+}
+
+.modal-btn:active {
+    transform: scale(0.98);
+}
+
+/* Cancel Button (Gray) */
+.modal-btn--cancel {
+    background: var(--bg-elevated, #334155);
+    color: var(--text-primary, #f8fafc);
+}
+
+.modal-btn--cancel:hover {
+    background: #475569;
+}
+
+/* Primary Button (Blue) */
+.modal-btn--primary {
+    background: var(--accent-color, #3b82f6);
+    color: white;
+}
+
+.modal-btn--primary:hover {
+    background: #2563eb;
+}
+
+/* Danger Button (Red) */
+.modal-btn--danger {
+    background: var(--danger-color, #ef4444);
+    color: white;
+}
+
+.modal-btn--danger:hover {
+    background: #dc2626;
+}
+
+/* ===================================
+   InputModal Specific Styles
+   =================================== */
+
+.modal-input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    background: var(--bg-app, #0f172a);
+    border: 1px solid var(--border-color, #334155);
+    border-radius: 8px;
+    color: var(--text-primary, #f8fafc);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.modal-input:focus {
+    outline: none;
+    border-color: var(--accent-color, #3b82f6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.modal-input::placeholder {
+    color: var(--text-muted, #64748b);
+}
+
+/* Number input specifics */
+.modal-input[type="number"] {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+/* Remove number input spinners */
+.modal-input[type="number"]::-webkit-outer-spin-button,
+.modal-input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.modal-input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+/* ===================================
+   ConfirmModal Danger Variant
+   =================================== */
+
+.modal-container--danger .modal-header {
+    border-bottom-color: rgba(239, 68, 68, 0.3);
+}
+
+.modal-container--danger .modal-title {
+    color: #fca5a5;
+}
+
+/* Warning Icon */
+.modal-icon {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.modal-icon--danger {
+    color: #ef4444;
+}
+
+.modal-icon--info {
+    color: #3b82f6;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .modal-backdrop,
+    .modal-container {
+        animation: none;
+    }
+}

@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { Batch, WeightEntry } from '../../../types/domain';
 import { BATCH_SIZE } from '../../../types/domain';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import './BatchList.css';
 
 interface BatchListProps {
@@ -35,6 +36,9 @@ export function BatchList({
     const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
     const [editValue, setEditValue] = useState<string>('');
 
+    // Delete confirmation modal state
+    const [deletingEntryId, setDeletingEntryId] = useState<string | null>(null);
+
     const handleEditStart = useCallback((entry: WeightEntry) => {
         setEditingEntryId(entry.id);
         setEditValue(entry.value.toString());
@@ -59,11 +63,20 @@ export function BatchList({
         setEditValue('');
     }, [editingEntryId, editValue, onUpdateWeight]);
 
-    const handleDelete = useCallback((entryId: string) => {
-        if (window.confirm('¿Estás seguro de eliminar este peso?')) {
-            onDeleteWeight?.(entryId);
+    const handleDeleteClick = useCallback((entryId: string) => {
+        setDeletingEntryId(entryId);
+    }, []);
+
+    const handleDeleteConfirm = useCallback(() => {
+        if (deletingEntryId) {
+            onDeleteWeight?.(deletingEntryId);
+            setDeletingEntryId(null);
         }
-    }, [onDeleteWeight]);
+    }, [deletingEntryId, onDeleteWeight]);
+
+    const handleDeleteCancel = useCallback(() => {
+        setDeletingEntryId(null);
+    }, []);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
@@ -120,7 +133,7 @@ export function BatchList({
                             onEditCancel={handleEditCancel}
                             onEditConfirm={handleEditConfirm}
                             onEditValueChange={setEditValue}
-                            onDelete={handleDelete}
+                            onDelete={handleDeleteClick}
                             onKeyDown={handleKeyDown}
                             canEdit={!!onUpdateWeight}
                             canDelete={!!onDeleteWeight}
@@ -128,6 +141,16 @@ export function BatchList({
                     ))
                 )}
             </div>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={deletingEntryId !== null}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title="Eliminar Peso"
+                message="¿Estás seguro de eliminar este peso? Esta acción no se puede deshacer."
+                variant="danger"
+            />
         </div>
     );
 }
@@ -171,6 +194,11 @@ function BatchItem({
         return null;
     }
 
+    // Calculate partial sum for open batches
+    const partialSum = !isClosed && entriesCount > 0
+        ? batch.entries.reduce((sum, e) => sum + e.value, 0)
+        : null;
+
     return (
         <div className={`batch-item ${isClosed ? 'batch-item--closed' : 'batch-item--open'}`}>
             {/* Batch Header */}
@@ -178,9 +206,16 @@ function BatchItem({
                 <span className="batch-item__status">
                     {isClosed ? '✓ Lote Completo' : `⏳ En progreso ${progress}`}
                 </span>
+                {/* Subtotal for closed batches */}
                 {isClosed && batch.subtotal !== null && (
                     <span className="batch-item__subtotal">
                         ∑ {batch.subtotal.toFixed(1)} kg
+                    </span>
+                )}
+                {/* Partial sum for open batches */}
+                {!isClosed && partialSum !== null && (
+                    <span className="batch-item__subtotal batch-item__subtotal--partial">
+                        ∑ {partialSum.toFixed(1)} kg
                     </span>
                 )}
             </div>
@@ -287,4 +322,3 @@ function BatchItem({
 }
 
 export default BatchList;
-

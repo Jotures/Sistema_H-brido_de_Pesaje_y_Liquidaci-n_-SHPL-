@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import type { Category, Batch, SettlementData, SettlementSummary, CategoryLine } from '../../../types/domain';
+import { safeAdd, safeSub, safeMult, roundToTwo, safeSum } from '../../../utils/math';
 
 // ============================================
 // localStorage Keys
@@ -27,12 +28,7 @@ function saveToStorage<T>(key: string, value: T): void {
     }
 }
 
-/**
- * Round to 2 decimal places (banker's rounding approximation)
- */
-function roundToTwo(num: number): number {
-    return Math.round((num + Number.EPSILON) * 100) / 100;
-}
+// NOTE: roundToTwo is now imported from '../../../utils/math'
 
 // ============================================
 // Hook Definition
@@ -84,10 +80,12 @@ export function useSettlement({
         Object.entries(batchesByKey).forEach(([key, batches]) => {
             const [entId, catId] = key.split(':');
             if (entId === entityId) {
+                // Use safe math for all weight calculations
                 const categoryWeight = batches.reduce((total, batch) => {
-                    return total + batch.entries.reduce((sum, entry) => sum + entry.value, 0);
+                    const batchWeight = safeSum(batch.entries.map(e => e.value));
+                    return safeAdd(total, batchWeight);
                 }, 0);
-                weights[catId] = (weights[catId] || 0) + categoryWeight;
+                weights[catId] = safeAdd(weights[catId] || 0, categoryWeight);
             }
         });
 
@@ -102,12 +100,13 @@ export function useSettlement({
         let grossTotal = 0;
         let totalWeight = 0;
 
-        // Build category breakdown
+        // Build category breakdown using safe math
         categories.forEach((category) => {
             const weight = weightsByCategory[category.id] || 0;
             if (weight > 0) {
                 const unitPrice = settlementData.prices[category.id] || 0;
-                const subtotal = roundToTwo(weight * unitPrice);
+                // SubtotalCategoria = safeMult(PesoCategoria, PrecioCategoria)
+                const subtotal = safeMult(weight, unitPrice);
 
                 categoryBreakdown.push({
                     categoryId: category.id,
@@ -115,19 +114,19 @@ export function useSettlement({
                     categoryColor: category.color,
                     totalWeight: weight,
                     unitPrice,
-                    subtotal,
+                    subtotal: roundToTwo(subtotal),
                 });
 
-                grossTotal += subtotal;
-                totalWeight += weight;
+                grossTotal = safeAdd(grossTotal, subtotal);
+                totalWeight = safeAdd(totalWeight, weight);
             }
         });
 
-        // Calculate freight
-        const freightTotal = roundToTwo(totalWeight * settlementData.freightRate);
+        // FleteTotal = safeMult(TotalPeso, TasaFlete)
+        const freightTotal = safeMult(totalWeight, settlementData.freightRate);
 
-        // Calculate final amount
-        const finalAmount = roundToTwo(grossTotal - freightTotal + settlementData.sackValue);
+        // GranTotal = (SumaSubtotales - FleteTotal) + ValorSacos
+        const finalAmount = roundToTwo(safeAdd(safeSub(grossTotal, freightTotal), settlementData.sackValue));
 
         return {
             categoryBreakdown,

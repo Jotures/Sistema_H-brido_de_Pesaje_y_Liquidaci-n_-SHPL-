@@ -82,3 +82,29 @@
             transparent 2px);
     pointer-events: none;
 }
+
+/* Last batch subtotal indicator */
+.big-display__last-batch {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #334155;
+}
+
+.last-batch__label {
+    font-size: 0.65rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.last-batch__value {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #3b82f6;
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+}

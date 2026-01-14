@@ -164,6 +164,12 @@
     text-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
 }
 
+/* Partial sum for open batches - yellow/orange color */
+.batch-item__subtotal--partial {
+    color: #f59e0b;
+    text-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+}
+
 /* Weight Entries Grid */
 .batch-item__entries {
     display: grid;

@@ -2,6 +2,8 @@ import { useState, useCallback } from 'react';
 import { useSession } from '../../../context/SessionContext';
 import type { OperationMode } from '../../../types/domain';
 import { DEFAULT_ENTITY, WAREHOUSE_ENTITY } from '../../../types/domain';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
+import { InputModal } from '../../../components/ui/InputModal';
 import './EntitySelector.css';
 
 interface EntitySelectorProps {
@@ -31,6 +33,11 @@ export function EntitySelector({ getEntityStats, onEntityDeleted }: EntitySelect
     const [isAdding, setIsAdding] = useState(false);
     const [newEntityName, setNewEntityName] = useState('');
     const [error, setError] = useState<string | null>(null);
+
+    // Modal states for rename and delete
+    const [isRenaming, setIsRenaming] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
+    const [deleteMessage, setDeleteMessage] = useState('');
 
     // ============================================
     // Event Handlers
@@ -93,26 +100,29 @@ export function EntitySelector({ getEntityStats, onEntityDeleted }: EntitySelect
         }
     }, [handleSubmitAdd, handleCancelAdd]);
 
-    // Edit entity handler
+    // Edit entity handler - open input modal
     const handleEditEntity = useCallback(() => {
         if (!activeEntity) return;
+        setIsRenaming(true);
+    }, [activeEntity]);
 
-        const newName = window.prompt(
-            `Nuevo nombre para "${activeEntity.name}":`,
-            activeEntity.name
-        );
+    const handleRenameConfirm = useCallback((newName: string) => {
+        if (!activeEntity) return;
 
-        if (newName !== null && newName.trim()) {
-            const success = renameEntity(activeEntity.id, newName.trim());
-            if (!success) {
-                setError('Ya existe una entidad con ese nombre');
-            } else {
-                setError(null);
-            }
+        const success = renameEntity(activeEntity.id, newName);
+        if (!success) {
+            setError('Ya existe una entidad con ese nombre');
+        } else {
+            setError(null);
         }
+        setIsRenaming(false);
     }, [activeEntity, renameEntity]);
 
-    // Delete entity handler
+    const handleRenameCancel = useCallback(() => {
+        setIsRenaming(false);
+    }, []);
+
+    // Delete entity handler - open confirm modal
     const handleDeleteEntity = useCallback(() => {
         if (!activeEntity) return;
 
@@ -135,14 +145,24 @@ export function EntitySelector({ getEntityStats, onEntityDeleted }: EntitySelect
             ? `¿Borrar a "${activeEntity.name}" y TODOS sus ${stats.entries} pesos registrados?`
             : `¿Eliminar a "${activeEntity.name}"?`;
 
-        if (window.confirm(message)) {
-            const success = removeEntity(activeEntity.id);
-            if (success) {
-                setError(null);
-                onEntityDeleted?.();
-            }
+        setDeleteMessage(message);
+        setIsDeleting(true);
+    }, [activeEntity, entities.length, getEntityStats]);
+
+    const handleDeleteConfirm = useCallback(() => {
+        if (!activeEntity) return;
+
+        const success = removeEntity(activeEntity.id);
+        if (success) {
+            setError(null);
+            onEntityDeleted?.();
         }
-    }, [activeEntity, entities.length, getEntityStats, removeEntity, onEntityDeleted]);
+        setIsDeleting(false);
+    }, [activeEntity, removeEntity, onEntityDeleted]);
+
+    const handleDeleteCancel = useCallback(() => {
+        setIsDeleting(false);
+    }, []);
 
     // ============================================
     // Render Helpers
@@ -314,6 +334,27 @@ export function EntitySelector({ getEntityStats, onEntityDeleted }: EntitySelect
                     </div>
                 </div>
             )}
+
+            {/* Rename Entity Modal */}
+            <InputModal
+                isOpen={isRenaming}
+                onClose={handleRenameCancel}
+                onConfirm={handleRenameConfirm}
+                title={`Renombrar "${activeEntity?.name || ''}"`}
+                initialValue={activeEntity?.name || ''}
+                inputType="text"
+                placeholder="Nuevo nombre"
+            />
+
+            {/* Delete Entity Modal */}
+            <ConfirmModal
+                isOpen={isDeleting}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title="Eliminar Entidad"
+                message={deleteMessage}
+                variant="danger"
+            />
         </div>
     );
 }

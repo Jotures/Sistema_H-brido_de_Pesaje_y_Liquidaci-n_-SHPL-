@@ -168,6 +168,12 @@ export function WeighingScreen({ onWeightSubmit }: WeighingScreenProps) {
                         <BigDisplay
                             value={inputValue}
                             label={`${activeCategory.name} - ${currentProgress + 1}/${BATCH_SIZE}`}
+                            lastBatchSubtotal={
+                                // Find last closed batch subtotal
+                                batches
+                                    .filter(b => b.status === 'closed' && b.subtotal !== null)
+                                    .slice(-1)[0]?.subtotal ?? null
+                            }
                         />
                     </div>
 

@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from 'react';
 import type { Category } from '../../../types/domain';
+import { ConfirmModal } from '../../../components/ui/ConfirmModal';
 import './CategorySelector.css';
 
 interface CategorySelectorProps {
@@ -31,6 +32,9 @@ export function CategorySelector({
     const [isEditMode, setIsEditMode] = useState(false);
     const [renamingCategoryId, setRenamingCategoryId] = useState<string | null>(null);
     const [renameValue, setRenameValue] = useState('');
+
+    // Delete confirmation modal state
+    const [deletingCategory, setDeletingCategory] = useState<{ id: string; name: string } | null>(null);
 
     // For double-click detection
     const lastClickRef = useRef<{ id: string; time: number } | null>(null);
@@ -72,7 +76,7 @@ export function CategorySelector({
         }
     }, [handleSubmit, handleCancel]);
 
-    const handleDeleteCategory = useCallback((categoryId: string, categoryName: string, e: React.MouseEvent) => {
+    const handleDeleteClick = useCallback((categoryId: string, categoryName: string, e: React.MouseEvent) => {
         e.stopPropagation();
 
         // Guardrail: Don't allow deleting if only one category remains
@@ -81,11 +85,19 @@ export function CategorySelector({
             return;
         }
 
-        // Cascade delete warning
-        if (window.confirm(`¿Borrar categoría "${categoryName}" y TODOS sus pesos registrados?`)) {
-            onDeleteCategory?.(categoryId);
+        setDeletingCategory({ id: categoryId, name: categoryName });
+    }, [categories.length]);
+
+    const handleDeleteConfirm = useCallback(() => {
+        if (deletingCategory) {
+            onDeleteCategory?.(deletingCategory.id);
+            setDeletingCategory(null);
         }
-    }, [categories.length, onDeleteCategory]);
+    }, [deletingCategory, onDeleteCategory]);
+
+    const handleDeleteCancel = useCallback(() => {
+        setDeletingCategory(null);
+    }, []);
 
     const handleCategoryClick = useCallback((categoryId: string) => {
         const now = Date.now();
@@ -210,7 +222,7 @@ export function CategorySelector({
                                     {canDelete && (
                                         <button
                                             className="category-chip__delete"
-                                            onClick={(e) => handleDeleteCategory(category.id, category.name, e)}
+                                            onClick={(e) => handleDeleteClick(category.id, category.name, e)}
                                             aria-label="Eliminar categoría"
                                             title="Eliminar"
                                         >
@@ -276,6 +288,16 @@ export function CategorySelector({
             {error && (
                 <div className="category-selector__error">{error}</div>
             )}
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={deletingCategory !== null}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title="Eliminar Categoría"
+                message={`¿Borrar categoría "${deletingCategory?.name || ''}" y TODOS sus pesos registrados?`}
+                variant="danger"
+            />
         </div>
     );
 }
