@@ -1,17 +1,20 @@
 import { useState, useCallback } from 'react';
 import { useSession } from '../../../context/SessionContext';
 import type { OperationMode } from '../../../types/domain';
+import { DEFAULT_ENTITY, WAREHOUSE_ENTITY } from '../../../types/domain';
 import './EntitySelector.css';
 
 interface EntitySelectorProps {
     getEntityStats: (entityId: string) => { weight: number; entries: number };
+    onEntityDeleted?: () => void;
 }
 
 /**
  * EntitySelector - Compact, collapsible header for entity/mode management
  * Mobile-first design: always shows current entity, expands on tap for full list
+ * Supports renaming and deleting entities
  */
-export function EntitySelector({ getEntityStats }: EntitySelectorProps) {
+export function EntitySelector({ getEntityStats, onEntityDeleted }: EntitySelectorProps) {
     const {
         mode,
         entities,
@@ -19,6 +22,8 @@ export function EntitySelector({ getEntityStats }: EntitySelectorProps) {
         activeEntity,
         setMode,
         addEntity,
+        removeEntity,
+        renameEntity,
         setActiveEntity,
     } = useSession();
 
@@ -88,6 +93,57 @@ export function EntitySelector({ getEntityStats }: EntitySelectorProps) {
         }
     }, [handleSubmitAdd, handleCancelAdd]);
 
+    // Edit entity handler
+    const handleEditEntity = useCallback(() => {
+        if (!activeEntity) return;
+
+        const newName = window.prompt(
+            `Nuevo nombre para "${activeEntity.name}":`,
+            activeEntity.name
+        );
+
+        if (newName !== null && newName.trim()) {
+            const success = renameEntity(activeEntity.id, newName.trim());
+            if (!success) {
+                setError('Ya existe una entidad con ese nombre');
+            } else {
+                setError(null);
+            }
+        }
+    }, [activeEntity, renameEntity]);
+
+    // Delete entity handler
+    const handleDeleteEntity = useCallback(() => {
+        if (!activeEntity) return;
+
+        // Don't allow deleting default entities
+        if (activeEntity.id === DEFAULT_ENTITY.id || activeEntity.id === WAREHOUSE_ENTITY.id) {
+            setError('No se puede eliminar la entidad por defecto');
+            return;
+        }
+
+        // Don't allow if it's the only entity
+        if (entities.length <= 1) {
+            setError('Debe haber al menos una entidad');
+            return;
+        }
+
+        const stats = getEntityStats(activeEntity.id);
+        const hasData = stats.entries > 0;
+
+        const message = hasData
+            ? `¿Borrar a "${activeEntity.name}" y TODOS sus ${stats.entries} pesos registrados?`
+            : `¿Eliminar a "${activeEntity.name}"?`;
+
+        if (window.confirm(message)) {
+            const success = removeEntity(activeEntity.id);
+            if (success) {
+                setError(null);
+                onEntityDeleted?.();
+            }
+        }
+    }, [activeEntity, entities.length, getEntityStats, removeEntity, onEntityDeleted]);
+
     // ============================================
     // Render Helpers
     // ============================================
@@ -103,6 +159,11 @@ export function EntitySelector({ getEntityStats }: EntitySelectorProps) {
     };
 
     const activeStats = activeEntity ? getEntityStats(activeEntity.id) : { entries: 0 };
+
+    // Check if active entity can be edited/deleted
+    const canEditActiveEntity = activeEntity &&
+        activeEntity.id !== DEFAULT_ENTITY.id &&
+        activeEntity.id !== WAREHOUSE_ENTITY.id;
 
     // ============================================
     // Render
@@ -155,6 +216,29 @@ export function EntitySelector({ getEntityStats }: EntitySelectorProps) {
                             🚛 Transbordo
                         </button>
                     </div>
+
+                    {/* Active Entity Actions */}
+                    {canEditActiveEntity && (
+                        <div className="entity-selector__actions">
+                            <span className="entity-selector__actions-label">
+                                Editar "{activeEntity?.name}":
+                            </span>
+                            <button
+                                className="entity-action-btn entity-action-btn--edit"
+                                onClick={handleEditEntity}
+                                title="Renombrar"
+                            >
+                                ✏️ Renombrar
+                            </button>
+                            <button
+                                className="entity-action-btn entity-action-btn--delete"
+                                onClick={handleDeleteEntity}
+                                title="Eliminar"
+                            >
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+                    )}
 
                     {/* Entity List */}
                     <div className="entity-selector__list">
@@ -235,3 +319,4 @@ export function EntitySelector({ getEntityStats }: EntitySelectorProps) {
 }
 
 export default EntitySelector;
+

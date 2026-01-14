@@ -72,7 +72,7 @@ export function CategorySelector({
         }
     }, [handleSubmit, handleCancel]);
 
-    const handleDeleteCategory = useCallback((categoryId: string, e: React.MouseEvent) => {
+    const handleDeleteCategory = useCallback((categoryId: string, categoryName: string, e: React.MouseEvent) => {
         e.stopPropagation();
 
         // Guardrail: Don't allow deleting if only one category remains
@@ -81,11 +81,9 @@ export function CategorySelector({
             return;
         }
 
-        if (window.confirm('¿Estás seguro de eliminar esta categoría?')) {
-            const success = onDeleteCategory?.(categoryId);
-            if (!success) {
-                setError('No se puede eliminar: tiene pesos registrados');
-            }
+        // Cascade delete warning
+        if (window.confirm(`¿Borrar categoría "${categoryName}" y TODOS sus pesos registrados?`)) {
+            onDeleteCategory?.(categoryId);
         }
     }, [categories.length, onDeleteCategory]);
 
@@ -212,7 +210,7 @@ export function CategorySelector({
                                     {canDelete && (
                                         <button
                                             className="category-chip__delete"
-                                            onClick={(e) => handleDeleteCategory(category.id, e)}
+                                            onClick={(e) => handleDeleteCategory(category.id, category.name, e)}
                                             aria-label="Eliminar categoría"
                                             title="Eliminar"
                                         >

@@ -199,23 +199,20 @@ export function useWeighingBatch(activeEntityId: string) {
     }, [categories]);
 
     /**
-     * Delete a category (only if it has no entries across ALL entities)
+     * Delete a category with cascade deletion of all associated weights
+     * WARNING: This will delete ALL weights for this category across ALL entities
      */
     const deleteCategory = useCallback((categoryId: string): boolean => {
         // Don't allow deleting the default category
         if (categoryId === DEFAULT_CATEGORY.id) return false;
 
-        // Check if any entity has entries for this category
-        const hasEntriesAnywhere = Object.entries(batchesByKey).some(([key, batches]) => {
-            const [, catId] = key.split(':');
-            return catId === categoryId && batches.some((b) => b.entries.length > 0);
-        });
+        // Don't allow deleting if it's the only category
+        if (categories.length <= 1) return false;
 
-        if (hasEntriesAnywhere) return false;
-
+        // Remove the category from the list
         setCategories((prev) => prev.filter((c) => c.id !== categoryId));
 
-        // Clean up batch data for this category
+        // CASCADE DELETE: Remove all batch data for this category across ALL entities
         setBatchesByKey((prev) => {
             const updated = { ...prev };
             Object.keys(updated).forEach((key) => {
@@ -233,7 +230,7 @@ export function useWeighingBatch(activeEntityId: string) {
         }
 
         return true;
-    }, [batchesByKey, activeCategoryId]);
+    }, [categories.length, activeCategoryId]);
 
     /**
      * Rename an existing category
