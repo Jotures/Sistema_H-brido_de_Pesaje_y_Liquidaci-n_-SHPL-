@@ -35,6 +35,8 @@ export function WeighingScreen({ onWeightSubmit }: WeighingScreenProps) {
         addCategory,
         switchCategory,
         addWeight,
+        deleteWeight,
+        updateWeight,
         getCurrentBatch,
         getTotalWeight,
         getTotalEntries,
@@ -162,6 +164,8 @@ export function WeighingScreen({ onWeightSubmit }: WeighingScreenProps) {
                         totalEntries={getTotalEntries()}
                         categoryName={activeCategory.name}
                         categoryColor={activeCategory.color}
+                        onDeleteWeight={deleteWeight}
+                        onUpdateWeight={updateWeight}
                     />
                 </div>
             )}

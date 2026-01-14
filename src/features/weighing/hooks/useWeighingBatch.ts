@@ -314,6 +314,97 @@ export function useWeighingBatch(activeEntityId: string) {
     }, [currentKey, activeEntityId, activeCategoryId]);
 
     /**
+     * Delete a weight entry and rebalance batches
+     */
+    const deleteWeight = useCallback((weightId: string) => {
+        setBatchesByKey((prev) => {
+            const currentBatches = prev[currentKey] || [];
+
+            // 1. Flatten all entries
+            const allEntries = currentBatches.flatMap(b => b.entries);
+
+            // 2. Filter out the specific weight
+            const filteredEntries = allEntries.filter(e => e.id !== weightId);
+
+            // If no changes (id not found), return prev
+            if (filteredEntries.length === allEntries.length) return prev;
+
+            // 3. Re-batch
+            const newBatches: Batch[] = [];
+            let batchIndex = 0;
+
+            for (let i = 0; i < filteredEntries.length; i += BATCH_SIZE) {
+                const chunk = filteredEntries.slice(i, i + BATCH_SIZE);
+                const isComplete = chunk.length === BATCH_SIZE;
+
+                // Reuse old batch ID if possible to stabilize keys
+                const batchId = currentBatches[batchIndex]?.id || generateId();
+
+                newBatches.push({
+                    id: batchId,
+                    entries: chunk,
+                    status: isComplete ? 'closed' : 'open',
+                    subtotal: isComplete ? calculateSubtotal(chunk) : null,
+                    categoryId: activeCategoryId,
+                    entityId: activeEntityId,
+                });
+                batchIndex++;
+            }
+
+            // Ensure there is always at least one open batch if the last one is full or if empty
+            if (newBatches.length === 0) {
+                newBatches.push(createNewBatch(activeEntityId, activeCategoryId));
+            } else {
+                const lastBatch = newBatches[newBatches.length - 1];
+                if (lastBatch.status === 'closed') {
+                    newBatches.push(createNewBatch(activeEntityId, activeCategoryId));
+                }
+            }
+
+            return {
+                ...prev,
+                [currentKey]: newBatches
+            };
+        });
+    }, [currentKey, activeEntityId, activeCategoryId]);
+
+    /**
+     * Update a weight value
+     */
+    const updateWeight = useCallback((weightId: string, newValue: number) => {
+        if (newValue <= 0) return;
+
+        setBatchesByKey((prev) => {
+            const currentBatches = prev[currentKey];
+            if (!currentBatches) return prev;
+
+            const newBatches = currentBatches.map(batch => {
+                const entryIndex = batch.entries.findIndex(e => e.id === weightId);
+                if (entryIndex === -1) return batch;
+
+                // Found the batch with the entry
+                const updatedEntries = [...batch.entries];
+                updatedEntries[entryIndex] = { ...updatedEntries[entryIndex], value: newValue };
+
+                return {
+                    ...batch,
+                    entries: updatedEntries,
+                    subtotal: batch.status === 'closed' ? calculateSubtotal(updatedEntries) : null
+                };
+            });
+
+            return {
+                ...prev,
+                [currentKey]: newBatches
+            };
+        });
+    }, [currentKey]);
+
+    // ============================================
+    // Getters
+    // ============================================
+
+    /**
      * Clear all batches for current entity + category
      */
     const clearActiveCategory = useCallback(() => {
@@ -322,10 +413,6 @@ export function useWeighingBatch(activeEntityId: string) {
             [currentKey]: [createNewBatch(activeEntityId, activeCategoryId)],
         }));
     }, [currentKey, activeEntityId, activeCategoryId]);
-
-    // ============================================
-    // Getters
-    // ============================================
 
     /**
      * Get current open batch for active entity + category
@@ -434,6 +521,8 @@ export function useWeighingBatch(activeEntityId: string) {
 
         // Weight actions
         addWeight,
+        deleteWeight,
+        updateWeight,
         clearActiveCategory,
 
         // Getters

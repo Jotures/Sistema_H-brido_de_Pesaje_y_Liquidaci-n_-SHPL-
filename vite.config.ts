@@ -2,8 +2,14 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// Nombre EXACTO de tu repositorio según tus capturas de Git
+const repoName = '/Sistema_H-brido_de_Pesaje_y_Liquidaci-n_-SHPL-/';
+
 // https://vite.dev/config/
 export default defineConfig({
+  // 👇 ESTA ES LA LÍNEA MÁGICA QUE TE FALTA
+  base: repoName,
+
   plugins: [
     react(),
     VitePWA({
@@ -17,8 +23,11 @@ export default defineConfig({
         background_color: '#0f172a',
         display: 'standalone',
         orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
+
+        // 👇 ESTO TAMBIÉN DEBE COINCIDIR PARA QUE LA APP SE INSTALE
+        scope: repoName,
+        start_url: repoName,
+
         icons: [
           {
             src: 'icons/icon-192x192.png',

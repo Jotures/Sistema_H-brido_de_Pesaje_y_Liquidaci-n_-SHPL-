@@ -8,6 +8,8 @@ interface BatchListProps {
     totalEntries: number;
     categoryName?: string;
     categoryColor?: string;
+    onDeleteWeight?: (id: string) => void;
+    onUpdateWeight?: (id: string, value: number) => void;
 }
 
 /**
@@ -20,6 +22,8 @@ export function BatchList({
     totalEntries,
     categoryName,
     categoryColor = '#10b981',
+    onDeleteWeight,
+    onUpdateWeight,
 }: BatchListProps) {
     // Reverse to show most recent first
     const reversedBatches = [...batches].reverse();
@@ -63,7 +67,12 @@ export function BatchList({
                     </div>
                 ) : (
                     reversedBatches.map((batch) => (
-                        <BatchItem key={batch.id} batch={batch} />
+                        <BatchItem
+                            key={batch.id}
+                            batch={batch}
+                            onDelete={onDeleteWeight}
+                            onUpdate={onUpdateWeight}
+                        />
                     ))
                 )}
             </div>
@@ -74,15 +83,47 @@ export function BatchList({
 /**
  * Individual batch display component
  */
-function BatchItem({ batch }: { batch: Batch }) {
+function BatchItem({
+    batch,
+    onDelete,
+    onUpdate
+}: {
+    batch: Batch;
+    onDelete?: (id: string) => void;
+    onUpdate?: (id: string, val: number) => void;
+}) {
     const isClosed = batch.status === 'closed';
     const entriesCount = batch.entries.length;
     const progress = `${entriesCount}/${BATCH_SIZE}`;
 
-    // Don't render empty open batches
+    // Don't render empty open batches (unless it's the only one, but parent handles that usually)
+    // Actually parent handles "No entries" global state, but if we have closed batches + one empty open batch at end (reversed start),
+    // we might want to hide it if we only want to show history. 
+    // But usually we want to see the "active" batch.
+    // Logic in original code: if (!isClosed && entriesCount === 0) return null;
     if (!isClosed && entriesCount === 0) {
         return null;
     }
+
+    const handleEditClick = (id: string, currentValue: number) => {
+        if (!onUpdate) return;
+        const input = window.prompt('Ingrese el nuevo peso:', currentValue.toString());
+        if (input !== null) {
+            const numVal = parseFloat(input);
+            if (!isNaN(numVal) && numVal > 0) {
+                onUpdate(id, numVal);
+            } else {
+                alert('Valor inválido');
+            }
+        }
+    };
+
+    const handleDeleteClick = (id: string) => {
+        if (!onDelete) return;
+        if (window.confirm('¿Está seguro de eliminar este peso?')) {
+            onDelete(id);
+        }
+    };
 
     return (
         <div className={`batch-item ${isClosed ? 'batch-item--closed' : 'batch-item--open'}`}>
@@ -101,10 +142,33 @@ function BatchItem({ batch }: { batch: Batch }) {
             {/* Weight Entries */}
             <div className="batch-item__entries">
                 {batch.entries.map((entry, index) => (
-                    <div key={entry.id} className="weight-entry">
+                    <div key={entry.id} className="weight-entry group">
                         <span className="weight-entry__index">{index + 1}</span>
                         <span className="weight-entry__value">{entry.value}</span>
                         <span className="weight-entry__unit">kg</span>
+
+                        {(onDelete || onUpdate) && (
+                            <div className="weight-entry__actions">
+                                {onUpdate && (
+                                    <button
+                                        className="action-btn action-btn--edit"
+                                        onClick={() => handleEditClick(entry.id, entry.value)}
+                                        title="Editar"
+                                    >
+                                        ✏️
+                                    </button>
+                                )}
+                                {onDelete && (
+                                    <button
+                                        className="action-btn action-btn--delete"
+                                        onClick={() => handleDeleteClick(entry.id)}
+                                        title="Borrar"
+                                    >
+                                        🗑️
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 ))}
 

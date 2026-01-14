@@ -264,3 +264,47 @@
 .batch-list__items::-webkit-scrollbar-thumb:hover {
     background: #64748b;
 }
+/* Action Buttons */
+.weight-entry {
+    position: relative;
+    /* Ensure actions don't overlap if content is large, though min-height helps */
+}
+
+.weight-entry__actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+    justify-content: center;
+    width: 100%;
+}
+
+.action-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 2px 4px;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+    border-radius: 4px;
+}
+
+.action-btn:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.action-btn--edit {
+    color: #3b82f6; /* Blue */
+}
+
+.action-btn--delete {
+    color: #ef4444; /* Red */
+}
+
+.action-btn--delete:hover {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.15);
+}
+
