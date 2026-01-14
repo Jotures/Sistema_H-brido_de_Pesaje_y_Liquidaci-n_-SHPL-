@@ -112,10 +112,33 @@
         0 0 20px rgba(34, 197, 94, 0.3);
     flex-direction: column;
     gap: 4px;
+    animation: enterGlow 2s ease-in-out infinite;
+}
+
+/* Pulsing glow animation for ENTER button prominence */
+@keyframes enterGlow {
+
+    0%,
+    100% {
+        box-shadow:
+            0 6px 0 #15803d,
+            0 8px 12px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25),
+            0 0 20px rgba(34, 197, 94, 0.3);
+    }
+
+    50% {
+        box-shadow:
+            0 6px 0 #15803d,
+            0 8px 12px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.25),
+            0 0 35px rgba(34, 197, 94, 0.55);
+    }
 }
 
 .keypad-btn--enter:active:not(:disabled) {
     transform: translateY(6px);
+    animation: none;
     box-shadow:
         0 0 0 #15803d,
         0 2px 4px rgba(0, 0, 0, 0.3),
