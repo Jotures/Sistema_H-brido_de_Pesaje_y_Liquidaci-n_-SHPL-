@@ -55,6 +55,7 @@ interface SessionContextValue {
     // Entity Actions
     addEntity: (name: string) => Entity | null;
     removeEntity: (id: string) => boolean;
+    renameEntity: (id: string, newName: string) => boolean;
     setActiveEntity: (id: string) => void;
 
     // Helpers
@@ -203,6 +204,28 @@ export function SessionProvider({ children }: SessionProviderProps) {
         }
     }, [mode, entities]);
 
+    /**
+     * Rename an existing entity
+     */
+    const renameEntity = useCallback((id: string, newName: string): boolean => {
+        const trimmedName = newName.trim();
+        if (!trimmedName) return false;
+
+        // Check for duplicate names in current mode (excluding current entity)
+        if (entities.some((e) => e.id !== id && e.name.toLowerCase() === trimmedName.toLowerCase())) {
+            return false;
+        }
+
+        setEntitiesByMode((prev) => ({
+            ...prev,
+            [mode]: prev[mode].map((e) =>
+                e.id === id ? { ...e, name: trimmedName } : e
+            ),
+        }));
+
+        return true;
+    }, [mode, entities]);
+
     // ============================================
     // Helpers
     // ============================================
@@ -227,6 +250,7 @@ export function SessionProvider({ children }: SessionProviderProps) {
         setMode,
         addEntity,
         removeEntity,
+        renameEntity,
         setActiveEntity,
         getTotalEntitiesWithData,
     };

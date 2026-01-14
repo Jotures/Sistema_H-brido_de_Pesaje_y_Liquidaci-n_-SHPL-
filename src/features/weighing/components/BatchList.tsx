@@ -1,4 +1,5 @@
-import type { Batch } from '../../../types/domain';
+import { useState, useCallback } from 'react';
+import type { Batch, WeightEntry } from '../../../types/domain';
 import { BATCH_SIZE } from '../../../types/domain';
 import './BatchList.css';
 
@@ -8,13 +9,14 @@ interface BatchListProps {
     totalEntries: number;
     categoryName?: string;
     categoryColor?: string;
-    onDeleteWeight?: (id: string) => void;
-    onUpdateWeight?: (id: string, value: number) => void;
+    onDeleteWeight?: (entryId: string) => void;
+    onUpdateWeight?: (entryId: string, newValue: number) => void;
 }
 
 /**
  * BatchList - Visual display of weight batches for a category
  * Shows closed batches with subtotals and open batch with progress
+ * Supports inline editing and deletion of individual weights
  */
 export function BatchList({
     batches,
@@ -28,6 +30,48 @@ export function BatchList({
     // Reverse to show most recent first
     const reversedBatches = [...batches].reverse();
     const closedBatchCount = batches.filter((b) => b.status === 'closed').length;
+
+    // Editing state
+    const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+    const [editValue, setEditValue] = useState<string>('');
+
+    const handleEditStart = useCallback((entry: WeightEntry) => {
+        setEditingEntryId(entry.id);
+        setEditValue(entry.value.toString());
+    }, []);
+
+    const handleEditCancel = useCallback(() => {
+        setEditingEntryId(null);
+        setEditValue('');
+    }, []);
+
+    const handleEditConfirm = useCallback(() => {
+        if (!editingEntryId) return;
+
+        const numValue = parseFloat(editValue);
+        if (isNaN(numValue) || numValue <= 0) {
+            // Invalid value - show visual feedback but don't close
+            return;
+        }
+
+        onUpdateWeight?.(editingEntryId, numValue);
+        setEditingEntryId(null);
+        setEditValue('');
+    }, [editingEntryId, editValue, onUpdateWeight]);
+
+    const handleDelete = useCallback((entryId: string) => {
+        if (window.confirm('¿Estás seguro de eliminar este peso?')) {
+            onDeleteWeight?.(entryId);
+        }
+    }, [onDeleteWeight]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            handleEditConfirm();
+        } else if (e.key === 'Escape') {
+            handleEditCancel();
+        }
+    }, [handleEditConfirm, handleEditCancel]);
 
     return (
         <div className="batch-list">
@@ -70,8 +114,16 @@ export function BatchList({
                         <BatchItem
                             key={batch.id}
                             batch={batch}
-                            onDelete={onDeleteWeight}
-                            onUpdate={onUpdateWeight}
+                            editingEntryId={editingEntryId}
+                            editValue={editValue}
+                            onEditStart={handleEditStart}
+                            onEditCancel={handleEditCancel}
+                            onEditConfirm={handleEditConfirm}
+                            onEditValueChange={setEditValue}
+                            onDelete={handleDelete}
+                            onKeyDown={handleKeyDown}
+                            canEdit={!!onUpdateWeight}
+                            canDelete={!!onDeleteWeight}
                         />
                     ))
                 )}
@@ -80,50 +132,44 @@ export function BatchList({
     );
 }
 
+interface BatchItemProps {
+    batch: Batch;
+    editingEntryId: string | null;
+    editValue: string;
+    onEditStart: (entry: WeightEntry) => void;
+    onEditCancel: () => void;
+    onEditConfirm: () => void;
+    onEditValueChange: (value: string) => void;
+    onDelete: (entryId: string) => void;
+    onKeyDown: (e: React.KeyboardEvent) => void;
+    canEdit: boolean;
+    canDelete: boolean;
+}
+
 /**
  * Individual batch display component
  */
 function BatchItem({
     batch,
+    editingEntryId,
+    editValue,
+    onEditStart,
+    onEditCancel,
+    onEditConfirm,
+    onEditValueChange,
     onDelete,
-    onUpdate
-}: {
-    batch: Batch;
-    onDelete?: (id: string) => void;
-    onUpdate?: (id: string, val: number) => void;
-}) {
+    onKeyDown,
+    canEdit,
+    canDelete,
+}: BatchItemProps) {
     const isClosed = batch.status === 'closed';
     const entriesCount = batch.entries.length;
     const progress = `${entriesCount}/${BATCH_SIZE}`;
 
-    // Don't render empty open batches (unless it's the only one, but parent handles that usually)
-    // Actually parent handles "No entries" global state, but if we have closed batches + one empty open batch at end (reversed start),
-    // we might want to hide it if we only want to show history. 
-    // But usually we want to see the "active" batch.
-    // Logic in original code: if (!isClosed && entriesCount === 0) return null;
+    // Don't render empty open batches
     if (!isClosed && entriesCount === 0) {
         return null;
     }
-
-    const handleEditClick = (id: string, currentValue: number) => {
-        if (!onUpdate) return;
-        const input = window.prompt('Ingrese el nuevo peso:', currentValue.toString());
-        if (input !== null) {
-            const numVal = parseFloat(input);
-            if (!isNaN(numVal) && numVal > 0) {
-                onUpdate(id, numVal);
-            } else {
-                alert('Valor inválido');
-            }
-        }
-    };
-
-    const handleDeleteClick = (id: string) => {
-        if (!onDelete) return;
-        if (window.confirm('¿Está seguro de eliminar este peso?')) {
-            onDelete(id);
-        }
-    };
 
     return (
         <div className={`batch-item ${isClosed ? 'batch-item--closed' : 'batch-item--open'}`}>
@@ -141,36 +187,83 @@ function BatchItem({
 
             {/* Weight Entries */}
             <div className="batch-item__entries">
-                {batch.entries.map((entry, index) => (
-                    <div key={entry.id} className="weight-entry group">
-                        <span className="weight-entry__index">{index + 1}</span>
-                        <span className="weight-entry__value">{entry.value}</span>
-                        <span className="weight-entry__unit">kg</span>
+                {batch.entries.map((entry, index) => {
+                    const isEditing = editingEntryId === entry.id;
 
-                        {(onDelete || onUpdate) && (
-                            <div className="weight-entry__actions">
-                                {onUpdate && (
+                    return (
+                        <div
+                            key={entry.id}
+                            className={`weight-entry ${isEditing ? 'weight-entry--editing' : ''}`}
+                        >
+                            <span className="weight-entry__index">{index + 1}</span>
+
+                            {isEditing ? (
+                                <input
+                                    type="number"
+                                    className="weight-entry__edit-input"
+                                    value={editValue}
+                                    onChange={(e) => onEditValueChange(e.target.value)}
+                                    onKeyDown={onKeyDown}
+                                    onBlur={onEditConfirm}
+                                    autoFocus
+                                    step="0.1"
+                                    min="0.1"
+                                />
+                            ) : (
+                                <>
+                                    <span className="weight-entry__value">{entry.value}</span>
+                                    <span className="weight-entry__unit">kg</span>
+                                </>
+                            )}
+
+                            {/* Action Buttons */}
+                            {(canEdit || canDelete) && !isEditing && (
+                                <div className="weight-entry__actions">
+                                    {canEdit && (
+                                        <button
+                                            className="action-btn action-btn--edit"
+                                            onClick={() => onEditStart(entry)}
+                                            aria-label="Editar peso"
+                                            title="Editar"
+                                        >
+                                            ✏️
+                                        </button>
+                                    )}
+                                    {canDelete && (
+                                        <button
+                                            className="action-btn action-btn--delete"
+                                            onClick={() => onDelete(entry.id)}
+                                            aria-label="Eliminar peso"
+                                            title="Eliminar"
+                                        >
+                                            🗑️
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Edit actions */}
+                            {isEditing && (
+                                <div className="weight-entry__actions">
                                     <button
-                                        className="action-btn action-btn--edit"
-                                        onClick={() => handleEditClick(entry.id, entry.value)}
-                                        title="Editar"
+                                        className="action-btn action-btn--confirm"
+                                        onClick={onEditConfirm}
+                                        aria-label="Confirmar"
                                     >
-                                        ✏️
+                                        ✓
                                     </button>
-                                )}
-                                {onDelete && (
                                     <button
-                                        className="action-btn action-btn--delete"
-                                        onClick={() => handleDeleteClick(entry.id)}
-                                        title="Borrar"
+                                        className="action-btn action-btn--cancel"
+                                        onClick={onEditCancel}
+                                        aria-label="Cancelar"
                                     >
-                                        🗑️
+                                        ✕
                                     </button>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                ))}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
 
                 {/* Empty slots for open batch */}
                 {!isClosed && Array.from({ length: BATCH_SIZE - entriesCount }).map((_, index) => (
@@ -194,3 +287,4 @@ function BatchItem({
 }
 
 export default BatchList;
+

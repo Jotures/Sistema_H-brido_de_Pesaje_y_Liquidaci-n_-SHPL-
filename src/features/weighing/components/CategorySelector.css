@@ -161,3 +161,110 @@
     text-align: center;
     border-top: 1px solid rgba(239, 68, 68, 0.2);
 }
+
+/* Edit Mode Toggle Button */
+.category-selector__edit-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid #475569;
+    color: #64748b;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.category-selector__edit-toggle:hover {
+    border-color: #64748b;
+    color: #94a3b8;
+}
+
+.category-selector__edit-toggle.active {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Edit Mode State */
+.category-selector--edit-mode {
+    background: linear-gradient(180deg, #1e293b 0%, #172033 100%);
+    border-bottom: 2px solid #3b82f6;
+}
+
+/* Category Chip Wrapper */
+.category-chip-wrapper {
+    flex-shrink: 0;
+}
+
+/* Edit Mode Chip Style */
+.category-chip--edit-mode {
+    border-style: dashed;
+    padding-right: 2rem;
+    position: relative;
+}
+
+/* Delete Button */
+.category-chip__delete {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #ef4444;
+    border: none;
+    color: #ffffff;
+    font-size: 0.625rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.category-chip__delete:hover {
+    background: #f87171;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Rename Form */
+.category-rename-form {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.category-rename-input {
+    width: 100px;
+    padding: 0.625rem 0.875rem;
+    border-radius: 9999px;
+    background: #0f172a;
+    border: 2px solid #3b82f6;
+    color: #f8fafc;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    outline: none;
+}
+
+.category-rename-input:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+/* Edit Mode Hint */
+.category-selector__hint {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    color: #64748b;
+    font-size: 0.6875rem;
+    font-style: italic;
+    white-space: nowrap;
+}

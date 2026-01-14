@@ -236,6 +236,25 @@ export function useWeighingBatch(activeEntityId: string) {
     }, [batchesByKey, activeCategoryId]);
 
     /**
+     * Rename an existing category
+     */
+    const renameCategory = useCallback((categoryId: string, newName: string): boolean => {
+        const trimmedName = newName.trim();
+        if (!trimmedName) return false;
+
+        // Check for duplicate names (excluding current category)
+        if (categories.some((c) => c.id !== categoryId && c.name.toLowerCase() === trimmedName.toLowerCase())) {
+            return false;
+        }
+
+        setCategories((prev) =>
+            prev.map((c) => (c.id === categoryId ? { ...c, name: trimmedName } : c))
+        );
+
+        return true;
+    }, [categories]);
+
+    /**
      * Switch to a different category
      */
     const switchCategory = useCallback((categoryId: string) => {
@@ -314,95 +333,110 @@ export function useWeighingBatch(activeEntityId: string) {
     }, [currentKey, activeEntityId, activeCategoryId]);
 
     /**
-     * Delete a weight entry and rebalance batches
+     * Delete a specific weight entry and recalculate batch
+     * - Reopens closed batches if they fall below BATCH_SIZE
+     * - Removes empty batches (except the last one)
      */
-    const deleteWeight = useCallback((weightId: string) => {
+    const deleteWeight = useCallback((entryId: string): boolean => {
+        let found = false;
+
         setBatchesByKey((prev) => {
-            const currentBatches = prev[currentKey] || [];
+            const existingBatches = prev[currentKey];
+            if (!existingBatches) return prev;
 
-            // 1. Flatten all entries
-            const allEntries = currentBatches.flatMap(b => b.entries);
+            const updatedBatches: Batch[] = [];
 
-            // 2. Filter out the specific weight
-            const filteredEntries = allEntries.filter(e => e.id !== weightId);
+            for (const batch of existingBatches) {
+                const entryIndex = batch.entries.findIndex((e) => e.id === entryId);
 
-            // If no changes (id not found), return prev
-            if (filteredEntries.length === allEntries.length) return prev;
+                if (entryIndex !== -1) {
+                    found = true;
+                    const updatedEntries = batch.entries.filter((e) => e.id !== entryId);
 
-            // 3. Re-batch
-            const newBatches: Batch[] = [];
-            let batchIndex = 0;
+                    // If batch becomes empty, skip it (unless it's the only one)
+                    if (updatedEntries.length === 0) {
+                        // Keep at least one batch
+                        if (updatedBatches.length === 0 && existingBatches.indexOf(batch) === existingBatches.length - 1) {
+                            updatedBatches.push(createNewBatch(activeEntityId, activeCategoryId));
+                        }
+                        continue;
+                    }
 
-            for (let i = 0; i < filteredEntries.length; i += BATCH_SIZE) {
-                const chunk = filteredEntries.slice(i, i + BATCH_SIZE);
-                const isComplete = chunk.length === BATCH_SIZE;
-
-                // Reuse old batch ID if possible to stabilize keys
-                const batchId = currentBatches[batchIndex]?.id || generateId();
-
-                newBatches.push({
-                    id: batchId,
-                    entries: chunk,
-                    status: isComplete ? 'closed' : 'open',
-                    subtotal: isComplete ? calculateSubtotal(chunk) : null,
-                    categoryId: activeCategoryId,
-                    entityId: activeEntityId,
-                });
-                batchIndex++;
+                    // Recalculate and possibly reopen the batch
+                    const isComplete = updatedEntries.length >= BATCH_SIZE;
+                    const updatedBatch: Batch = {
+                        ...batch,
+                        entries: updatedEntries,
+                        status: isComplete ? 'closed' : 'open',
+                        subtotal: isComplete ? calculateSubtotal(updatedEntries) : null,
+                    };
+                    updatedBatches.push(updatedBatch);
+                } else {
+                    updatedBatches.push(batch);
+                }
             }
 
-            // Ensure there is always at least one open batch if the last one is full or if empty
-            if (newBatches.length === 0) {
-                newBatches.push(createNewBatch(activeEntityId, activeCategoryId));
-            } else {
-                const lastBatch = newBatches[newBatches.length - 1];
-                if (lastBatch.status === 'closed') {
-                    newBatches.push(createNewBatch(activeEntityId, activeCategoryId));
-                }
+            // Ensure there's at least one batch
+            if (updatedBatches.length === 0) {
+                updatedBatches.push(createNewBatch(activeEntityId, activeCategoryId));
+            }
+
+            // Ensure the last batch is open for new entries
+            const lastBatch = updatedBatches[updatedBatches.length - 1];
+            if (lastBatch.status === 'closed') {
+                updatedBatches.push(createNewBatch(activeEntityId, activeCategoryId));
             }
 
             return {
                 ...prev,
-                [currentKey]: newBatches
+                [currentKey]: updatedBatches,
             };
         });
+
+        return found;
     }, [currentKey, activeEntityId, activeCategoryId]);
 
     /**
-     * Update a weight value
+     * Update the value of an existing weight entry
+     * - Validates that newValue > 0
+     * - Recalculates batch subtotal if closed
      */
-    const updateWeight = useCallback((weightId: string, newValue: number) => {
-        if (newValue <= 0) return;
+    const updateWeight = useCallback((entryId: string, newValue: number): boolean => {
+        if (newValue <= 0) return false;
+
+        let found = false;
 
         setBatchesByKey((prev) => {
-            const currentBatches = prev[currentKey];
-            if (!currentBatches) return prev;
+            const existingBatches = prev[currentKey];
+            if (!existingBatches) return prev;
 
-            const newBatches = currentBatches.map(batch => {
-                const entryIndex = batch.entries.findIndex(e => e.id === weightId);
-                if (entryIndex === -1) return batch;
+            const updatedBatches = existingBatches.map((batch) => {
+                const entryIndex = batch.entries.findIndex((e) => e.id === entryId);
 
-                // Found the batch with the entry
-                const updatedEntries = [...batch.entries];
-                updatedEntries[entryIndex] = { ...updatedEntries[entryIndex], value: newValue };
+                if (entryIndex !== -1) {
+                    found = true;
+                    const updatedEntries = batch.entries.map((e) =>
+                        e.id === entryId ? { ...e, value: newValue } : e
+                    );
 
-                return {
-                    ...batch,
-                    entries: updatedEntries,
-                    subtotal: batch.status === 'closed' ? calculateSubtotal(updatedEntries) : null
-                };
+                    return {
+                        ...batch,
+                        entries: updatedEntries,
+                        subtotal: batch.status === 'closed' ? calculateSubtotal(updatedEntries) : null,
+                    };
+                }
+
+                return batch;
             });
 
             return {
                 ...prev,
-                [currentKey]: newBatches
+                [currentKey]: updatedBatches,
             };
         });
-    }, [currentKey]);
 
-    // ============================================
-    // Getters
-    // ============================================
+        return found;
+    }, [currentKey]);
 
     /**
      * Clear all batches for current entity + category
@@ -413,6 +447,10 @@ export function useWeighingBatch(activeEntityId: string) {
             [currentKey]: [createNewBatch(activeEntityId, activeCategoryId)],
         }));
     }, [currentKey, activeEntityId, activeCategoryId]);
+
+    // ============================================
+    // Getters
+    // ============================================
 
     /**
      * Get current open batch for active entity + category
@@ -517,6 +555,7 @@ export function useWeighingBatch(activeEntityId: string) {
         // Category actions
         addCategory,
         deleteCategory,
+        renameCategory,
         switchCategory,
 
         // Weight actions

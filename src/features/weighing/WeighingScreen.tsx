@@ -6,6 +6,8 @@ import { CategorySelector } from './components/CategorySelector';
 import { EntitySelector } from '../session/components/EntitySelector';
 import { useSession } from '../../context/SessionContext';
 import { useWeighingBatch } from './hooks/useWeighingBatch';
+import { useToast } from '../../hooks/useToast';
+import { Toast } from '../../components/Toast';
 import './WeighingScreen.css';
 
 type ViewMode = 'input' | 'history';
@@ -26,6 +28,9 @@ export function WeighingScreen({ onWeightSubmit }: WeighingScreenProps) {
     // Get session context (entity management)
     const { activeEntityId, activeEntity, mode } = useSession();
 
+    // Toast for user feedback
+    const { toast, showToast, hideToast } = useToast();
+
     // Weighing batch hook now depends on activeEntityId
     const {
         categories,
@@ -33,6 +38,8 @@ export function WeighingScreen({ onWeightSubmit }: WeighingScreenProps) {
         activeCategory,
         batches,
         addCategory,
+        deleteCategory,
+        renameCategory,
         switchCategory,
         addWeight,
         deleteWeight,
@@ -82,11 +89,48 @@ export function WeighingScreen({ onWeightSubmit }: WeighingScreenProps) {
         setViewMode((prev) => (prev === 'input' ? 'history' : 'input'));
     }, []);
 
+    // Handlers for weight editing
+    const handleDeleteWeight = useCallback((entryId: string) => {
+        const success = deleteWeight(entryId);
+        if (success) {
+            showToast('Peso eliminado', 'success');
+        }
+    }, [deleteWeight, showToast]);
+
+    const handleUpdateWeight = useCallback((entryId: string, newValue: number) => {
+        const success = updateWeight(entryId, newValue);
+        if (success) {
+            showToast('Peso actualizado', 'success');
+        } else {
+            showToast('Valor inválido (debe ser > 0)', 'error');
+        }
+    }, [updateWeight, showToast]);
+
+    // Handlers for category editing
+    const handleDeleteCategory = useCallback((categoryId: string): boolean => {
+        const success = deleteCategory(categoryId);
+        if (success) {
+            showToast('Categoría eliminada', 'info');
+        }
+        return success;
+    }, [deleteCategory, showToast]);
+
+    const handleRenameCategory = useCallback((categoryId: string, newName: string): boolean => {
+        const success = renameCategory(categoryId, newName);
+        if (success) {
+            showToast('Categoría renombrada', 'success');
+        }
+        return success;
+    }, [renameCategory, showToast]);
+
     // Get context label for display
     const getModeVerb = () => mode === 'DESCARGA' ? 'Recibiendo de' : 'Enviando a';
 
     return (
         <div className="weighing-screen">
+            {/* Toast Notification */}
+            <Toast {...toast} onClose={hideToast} />
+
             {/* Entity Selector (Collapsible) */}
             <EntitySelector getEntityStats={getEntityStats} />
 
@@ -113,6 +157,8 @@ export function WeighingScreen({ onWeightSubmit }: WeighingScreenProps) {
                 onSelectCategory={switchCategory}
                 onAddCategory={addCategory}
                 getCategoryStats={getCategoryStats}
+                onDeleteCategory={handleDeleteCategory}
+                onRenameCategory={handleRenameCategory}
             />
 
             {viewMode === 'input' ? (
@@ -164,8 +210,8 @@ export function WeighingScreen({ onWeightSubmit }: WeighingScreenProps) {
                         totalEntries={getTotalEntries()}
                         categoryName={activeCategory.name}
                         categoryColor={activeCategory.color}
-                        onDeleteWeight={deleteWeight}
-                        onUpdateWeight={updateWeight}
+                        onDeleteWeight={handleDeleteWeight}
+                        onUpdateWeight={handleUpdateWeight}
                     />
                 </div>
             )}
@@ -184,3 +230,4 @@ export function WeighingScreen({ onWeightSubmit }: WeighingScreenProps) {
 }
 
 export default WeighingScreen;
+
