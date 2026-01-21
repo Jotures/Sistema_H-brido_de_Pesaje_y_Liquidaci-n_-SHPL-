@@ -1,4 +1,5 @@
 import { useSession } from '../../context/SessionContext';
+import { EntitySwitcher } from '../session/components/EntitySwitcher';
 import { useWeighingBatch } from '../weighing/hooks/useWeighingBatch';
 import { useSettlement } from './hooks/useSettlement';
 import { SettlementLineItem } from './components/SettlementLineItem';
@@ -47,7 +48,7 @@ export function SettlementScreen() {
             {/* Header */}
             <header className="settlement-header">
                 <h1 className="settlement-header__title">
-                    💰 Liquidación: {activeEntity?.name || 'Sin selección'}
+                    💰 Liquidando a: <EntitySwitcher />
                 </h1>
                 <p className="settlement-header__date">{currentDate}</p>
             </header>

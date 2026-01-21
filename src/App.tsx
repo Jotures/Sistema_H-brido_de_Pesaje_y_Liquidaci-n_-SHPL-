@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { SessionProvider } from './context/SessionContext';
 import { WeighingScreen } from './features/weighing';
 import { SettlementScreen } from './features/settlement';
+import { HistoryScreen } from './features/history';
 import { ConfirmModal } from './components/ui/ConfirmModal';
 import { factoryReset, getStorageStats } from './services/storage';
 import './App.css';
@@ -90,19 +91,7 @@ function App() {
       case 'weighing':
         return <WeighingScreen onWeightSubmit={handleWeightSubmit} />;
       case 'records':
-        return (
-          <div className="placeholder-view">
-            <h2>📋 Registros</h2>
-            <p>Total: {weightRecords.length} pesajes</p>
-            {weightRecords.length > 0 && (
-              <ul className="records-list">
-                {weightRecords.slice(-10).map((record, idx) => (
-                  <li key={idx}>{record.weight} kg</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        );
+        return <HistoryScreen />;
       case 'settlement':
         return <SettlementScreen />;
       case 'settings':

@@ -1,0 +1,417 @@
+/* ===================================
+   NotebookLayout.css
+   Notebook/Ledger Grid Layout for History Screen
+   =================================== */
+
+/* ===================================
+   Container
+   =================================== */
+
+.notebook-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--bg-app);
+    overflow: hidden;
+}
+
+/* ===================================
+   Sheet Header (Owner + Date)
+   =================================== */
+
+.notebook-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background-color: var(--bg-panel);
+    border-bottom: 2px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.notebook-owner {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.notebook-date {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1rem;
+    color: var(--text-secondary);
+    background-color: var(--bg-elevated);
+    padding: 4px 12px;
+    border-radius: 4px;
+}
+
+/* ===================================
+   Empty State
+   =================================== */
+
+.notebook-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.notebook-empty__icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.notebook-empty h2 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.notebook-empty p {
+    font-size: 0.9rem;
+    max-width: 280px;
+}
+
+/* ===================================
+   Grid Body (Horizontal Scroll Area)
+   =================================== */
+
+.notebook-body {
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: auto;
+    padding: 16px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.notebook-grid {
+    display: inline-flex;
+    gap: 0;
+    min-width: 100%;
+}
+
+/* ===================================
+   Category Group (Visual Grouping)
+   =================================== */
+
+.notebook-category-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.notebook-category-header {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-color);
+    padding: 8px 4px;
+    text-align: center;
+    min-width: 70px;
+    border-bottom: 2px solid var(--accent-color);
+    white-space: nowrap;
+}
+
+.notebook-category-header--empty {
+    visibility: hidden;
+    border-bottom: 2px solid transparent;
+}
+
+/* ===================================
+   Column (Each Batch)
+   =================================== */
+
+.notebook-column {
+    display: flex;
+    flex-direction: column;
+    min-width: 70px;
+    max-width: 70px;
+    border-right: 1px solid var(--border-color);
+    background-color: var(--bg-panel);
+}
+
+.notebook-column:first-child {
+    border-left: 1px solid var(--border-color);
+}
+
+.notebook-column--category-start {
+    border-left: 2px solid var(--accent-color);
+}
+
+.notebook-column--open {
+    opacity: 0.7;
+}
+
+/* ===================================
+   Weight Cells
+   =================================== */
+
+.notebook-cells {
+    display: flex;
+    flex-direction: column;
+}
+
+.notebook-cell {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: center;
+    padding: 8px 4px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    min-height: 24px;
+}
+
+.notebook-cell--empty {
+    color: var(--text-muted);
+}
+
+/* ===================================
+   Subtotal Row
+   =================================== */
+
+.notebook-subtotal {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.95rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 10px 4px;
+    color: var(--success-color);
+    background-color: rgba(34, 197, 94, 0.1);
+    border-top: 2px solid var(--success-color);
+    margin-top: auto;
+}
+
+.notebook-subtotal--partial {
+    font-weight: 500;
+    color: var(--warning-color);
+    background-color: rgba(245, 158, 11, 0.1);
+    border-top: 2px dashed var(--warning-color);
+}
+
+/* ===================================
+   Footer (Settlement Summary)
+   =================================== */
+
+.notebook-footer {
+    flex-shrink: 0;
+    padding: 16px 20px;
+    background-color: var(--bg-panel);
+    border-top: 2px solid var(--border-color);
+}
+
+.notebook-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Category calculation rows */
+.notebook-calc-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    padding: 4px 0;
+}
+
+.notebook-calc-category {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notebook-calc-category__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.notebook-calc-category__name {
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 80px;
+}
+
+.notebook-calc-formula {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--text-muted);
+}
+
+.notebook-calc-formula span {
+    color: var(--text-secondary);
+}
+
+.notebook-calc-result {
+    font-weight: 600;
+    color: var(--text-primary);
+    min-width: 100px;
+    text-align: right;
+}
+
+/* Deduction rows */
+.notebook-deduction {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.9rem;
+    padding: 6px 0;
+    border-top: 1px dashed var(--border-color);
+    color: var(--danger-color);
+}
+
+.notebook-deduction__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notebook-deduction__value {
+    font-weight: 600;
+}
+
+/* Divider line */
+.notebook-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 8px 0;
+}
+
+.notebook-divider--double {
+    height: 3px;
+    background: linear-gradient(to bottom,
+            var(--border-color) 0%,
+            var(--border-color) 40%,
+            transparent 40%,
+            transparent 60%,
+            var(--border-color) 60%,
+            var(--border-color) 100%);
+}
+
+/* Final total */
+.notebook-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    margin-top: 8px;
+}
+
+.notebook-total__label {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.notebook-total__amount {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--success-color);
+    text-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+/* ===================================
+   Stats Row (Quick Info)
+   =================================== */
+
+.notebook-stats {
+    display: flex;
+    gap: 16px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 8px;
+}
+
+.notebook-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.notebook-stat__label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.notebook-stat__value {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ===================================
+   Responsive Adjustments
+   =================================== */
+
+@media (max-width: 480px) {
+    .notebook-header {
+        padding: 12px 16px;
+    }
+
+    .notebook-owner {
+        font-size: 1.1rem;
+    }
+
+    .notebook-date {
+        font-size: 0.85rem;
+        padding: 3px 8px;
+    }
+
+    .notebook-column {
+        min-width: 60px;
+        max-width: 60px;
+    }
+
+    .notebook-cell {
+        font-size: 0.85rem;
+        padding: 6px 2px;
+    }
+
+    .notebook-subtotal {
+        font-size: 0.85rem;
+        padding: 8px 2px;
+    }
+
+    .notebook-footer {
+        padding: 12px 16px;
+    }
+
+    .notebook-total__amount {
+        font-size: 1.5rem;
+    }
+}
+
+/* ===================================
+   Scrollbar Styling
+   =================================== */
+
+.notebook-body::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.notebook-body::-webkit-scrollbar-track {
+    background: var(--bg-app);
+    border-radius: 4px;
+}
+
+.notebook-body::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+}
+
+.notebook-body::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}

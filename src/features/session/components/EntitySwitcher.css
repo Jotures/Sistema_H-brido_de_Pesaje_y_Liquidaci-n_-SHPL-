@@ -1,0 +1,148 @@
+/* ===================================
+   EntitySwitcher - Quick Entity Selection
+   Dark Mode Styling
+   =================================== */
+
+/* ===================================
+   Switcher Button (Inline Trigger)
+   =================================== */
+
+.entity-switcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+}
+
+.entity-switcher:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.entity-switcher:active {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.entity-switcher__name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary, #f8fafc);
+    white-space: nowrap;
+}
+
+.entity-switcher__chevron {
+    font-size: 0.7rem;
+    color: var(--text-secondary, #94a3b8);
+    transition: transform 0.2s ease;
+    line-height: 1;
+}
+
+.entity-switcher__chevron.open {
+    transform: rotate(180deg);
+}
+
+/* ===================================
+   Modal Styles
+   =================================== */
+
+.entity-switcher-modal {
+    min-width: 280px;
+}
+
+.entity-switcher-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+/* ===================================
+   Entity Item (In Modal List)
+   =================================== */
+
+.entity-switcher-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--bg-elevated, #334155);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-align: left;
+}
+
+.entity-switcher-item:hover {
+    background: var(--bg-panel, #1e293b);
+    border-color: var(--accent-color, #3b82f6);
+}
+
+.entity-switcher-item:active {
+    transform: scale(0.98);
+}
+
+.entity-switcher-item.active {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: var(--accent-color, #3b82f6);
+}
+
+.entity-switcher-item__name {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-primary, #f8fafc);
+}
+
+.entity-switcher-item__check {
+    font-size: 1.1rem;
+    color: var(--accent-color, #3b82f6);
+    font-weight: bold;
+}
+
+/* ===================================
+   Responsive Adjustments
+   =================================== */
+
+@media (max-width: 480px) {
+    .entity-switcher__name {
+        font-size: 1.1rem;
+    }
+
+    .entity-switcher-item {
+        padding: 12px 14px;
+    }
+
+    .entity-switcher-item__name {
+        font-size: 0.95rem;
+    }
+}
+
+/* ===================================
+   Scrollbar Styling for List
+   =================================== */
+
+.entity-switcher-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.entity-switcher-list::-webkit-scrollbar-track {
+    background: var(--bg-app, #0f172a);
+    border-radius: 3px;
+}
+
+.entity-switcher-list::-webkit-scrollbar-thumb {
+    background: var(--border-color, #334155);
+    border-radius: 3px;
+}
+
+.entity-switcher-list::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted, #64748b);
+}
