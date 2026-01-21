@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 // Nombre EXACTO de tu repositorio según tus capturas de Git
-const repoName = '/Sistema_H-brido_de_Pesaje_y_Liquidaci-n_-SHPL-/';
+const repoName = '/';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -25,8 +25,8 @@ export default defineConfig({
         orientation: 'portrait',
 
         // 👇 ESTO TAMBIÉN DEBE COINCIDIR PARA QUE LA APP SE INSTALE
-        scope: repoName,
-        start_url: repoName,
+        scope: '/',
+        start_url: '/',
 
         icons: [
           {
