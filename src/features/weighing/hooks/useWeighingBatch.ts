@@ -8,6 +8,7 @@ import { safeSum } from '../../../utils/math';
 // ============================================
 const STORAGE_KEYS = {
     CATEGORIES: 'shpl_categories',
+    ACTIVE_CATEGORY: 'shpl_active_category', // Track selected category
     BATCHES_PREFIX: 'shpl_batches_', // Suffix: entityId:categoryId
     ALL_BATCH_KEYS: 'shpl_batch_keys', // Track all batch keys for cleanup
 } as const;
@@ -87,8 +88,19 @@ export function useWeighingBatch(activeEntityId: string) {
         loadFromStorage(STORAGE_KEYS.CATEGORIES, [DEFAULT_CATEGORY])
     );
 
-    // Active category ID
-    const [activeCategoryId, setActiveCategoryId] = useState<string>(DEFAULT_CATEGORY.id);
+    // Active category ID - initialized from localStorage with validation
+    const [activeCategoryId, setActiveCategoryId] = useState<string>(() => {
+        const savedCategoryId = loadFromStorage<string>(STORAGE_KEYS.ACTIVE_CATEGORY, '');
+        const savedCategories = loadFromStorage<Category[]>(STORAGE_KEYS.CATEGORIES, [DEFAULT_CATEGORY]);
+
+        // Check if saved category still exists
+        if (savedCategoryId && savedCategories.some(c => c.id === savedCategoryId)) {
+            return savedCategoryId;
+        }
+
+        // Fallback to first available category
+        return savedCategories.length > 0 ? savedCategories[0].id : DEFAULT_CATEGORY.id;
+    });
 
     // ============================================
     // Batches State (per entity:category)
@@ -137,9 +149,19 @@ export function useWeighingBatch(activeEntityId: string) {
 
     /**
      * Get the active category object
+     * Falls back to first available category (not DEFAULT_CATEGORY) to prevent ghost categories
      */
     const activeCategory = useMemo(() => {
-        return categories.find((c) => c.id === activeCategoryId) || DEFAULT_CATEGORY;
+        const found = categories.find((c) => c.id === activeCategoryId);
+        if (found) return found;
+
+        // Fallback to first available category
+        if (categories.length > 0) {
+            // Also update the activeCategoryId to prevent desync
+            return categories[0];
+        }
+
+        return DEFAULT_CATEGORY;
     }, [categories, activeCategoryId]);
 
     // ============================================
@@ -150,6 +172,18 @@ export function useWeighingBatch(activeEntityId: string) {
     useEffect(() => {
         saveToStorage(STORAGE_KEYS.CATEGORIES, categories);
     }, [categories]);
+
+    // Persist active category ID
+    useEffect(() => {
+        saveToStorage(STORAGE_KEYS.ACTIVE_CATEGORY, activeCategoryId);
+    }, [activeCategoryId]);
+
+    // Fix activeCategoryId if it points to a deleted category
+    useEffect(() => {
+        if (categories.length > 0 && !categories.some(c => c.id === activeCategoryId)) {
+            setActiveCategoryId(categories[0].id);
+        }
+    }, [categories, activeCategoryId]);
 
     // Persist batches when they change
     useEffect(() => {
