@@ -205,11 +205,12 @@ export function useWeighingBatch(activeEntityId: string) {
      * WARNING: This will delete ALL weights for this category across ALL entities
      */
     const deleteCategory = useCallback((categoryId: string): boolean => {
-        // Don't allow deleting the default category
-        if (categoryId === DEFAULT_CATEGORY.id) return false;
-
         // Don't allow deleting if it's the only category
         if (categories.length <= 1) return false;
+
+        // Find the category to delete
+        const categoryToDelete = categories.find(c => c.id === categoryId);
+        if (!categoryToDelete) return false;
 
         // Remove the category from the list
         setCategories((prev) => prev.filter((c) => c.id !== categoryId));
@@ -226,13 +227,16 @@ export function useWeighingBatch(activeEntityId: string) {
             return updated;
         });
 
-        // If deleting active category, switch to default
+        // If deleting active category, switch to the first remaining category
         if (activeCategoryId === categoryId) {
-            setActiveCategoryId(DEFAULT_CATEGORY.id);
+            const remainingCategories = categories.filter(c => c.id !== categoryId);
+            if (remainingCategories.length > 0) {
+                setActiveCategoryId(remainingCategories[0].id);
+            }
         }
 
         return true;
-    }, [categories.length, activeCategoryId]);
+    }, [categories, activeCategoryId]);
 
     /**
      * Rename an existing category

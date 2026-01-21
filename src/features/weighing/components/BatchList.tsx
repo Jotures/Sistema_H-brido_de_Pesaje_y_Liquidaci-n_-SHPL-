@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { Batch, WeightEntry } from '../../../types/domain';
 import { BATCH_SIZE } from '../../../types/domain';
 import { ConfirmModal } from '../../../components/ui/ConfirmModal';
+import { ContextMenu, type ContextMenuOption } from '../../../components/ui/ContextMenu';
 import './BatchList.css';
 
 interface BatchListProps {
@@ -245,52 +246,39 @@ function BatchItem({
                                     min="0.1"
                                 />
                             ) : (
-                                <>
+                                <div className="weight-entry__content">
                                     <span className="weight-entry__value">{entry.value}</span>
                                     <span className="weight-entry__unit">kg</span>
-                                </>
-                            )}
-
-                            {/* Action Buttons */}
-                            {(canEdit || canDelete) && !isEditing && (
-                                <div className="weight-entry__actions">
-                                    {canEdit && (
-                                        <button
-                                            className="action-btn action-btn--edit"
-                                            onClick={() => onEditStart(entry)}
-                                            aria-label="Editar peso"
-                                            title="Editar"
-                                        >
-                                            ✏️
-                                        </button>
-                                    )}
-                                    {canDelete && (
-                                        <button
-                                            className="action-btn action-btn--delete"
-                                            onClick={() => onDelete(entry.id)}
-                                            aria-label="Eliminar peso"
-                                            title="Eliminar"
-                                        >
-                                            🗑️
-                                        </button>
-                                    )}
                                 </div>
                             )}
 
-                            {/* Edit actions */}
+                            {/* Context Menu for actions */}
+                            {(canEdit || canDelete) && !isEditing && (
+                                <WeightEntryMenu
+                                    entry={entry}
+                                    canEdit={canEdit}
+                                    canDelete={canDelete}
+                                    onEditStart={onEditStart}
+                                    onDelete={onDelete}
+                                />
+                            )}
+
+                            {/* Edit mode actions */}
                             {isEditing && (
-                                <div className="weight-entry__actions">
+                                <div className="weight-entry__edit-actions">
                                     <button
-                                        className="action-btn action-btn--confirm"
+                                        className="edit-action-btn edit-action-btn--confirm"
                                         onClick={onEditConfirm}
                                         aria-label="Confirmar"
+                                        type="button"
                                     >
                                         ✓
                                     </button>
                                     <button
-                                        className="action-btn action-btn--cancel"
+                                        className="edit-action-btn edit-action-btn--cancel"
                                         onClick={onEditCancel}
                                         aria-label="Cancelar"
+                                        type="button"
                                     >
                                         ✕
                                     </button>
@@ -319,6 +307,54 @@ function BatchItem({
             )}
         </div>
     );
+}
+
+/**
+ * WeightEntryMenu - Context menu for individual weight entries
+ * Provides Edit and Delete options in a compact three-dot menu
+ */
+interface WeightEntryMenuProps {
+    entry: WeightEntry;
+    canEdit: boolean;
+    canDelete: boolean;
+    onEditStart: (entry: WeightEntry) => void;
+    onDelete: (entryId: string) => void;
+}
+
+function WeightEntryMenu({
+    entry,
+    canEdit,
+    canDelete,
+    onEditStart,
+    onDelete,
+}: WeightEntryMenuProps) {
+    const menuOptions = useMemo<ContextMenuOption[]>(() => {
+        const options: ContextMenuOption[] = [];
+
+        if (canEdit) {
+            options.push({
+                id: 'edit',
+                icon: '✏️',
+                label: 'Editar Peso',
+                onClick: () => onEditStart(entry),
+                variant: 'default',
+            });
+        }
+
+        if (canDelete) {
+            options.push({
+                id: 'delete',
+                icon: '🗑️',
+                label: 'Eliminar Peso',
+                onClick: () => onDelete(entry.id),
+                variant: 'danger',
+            });
+        }
+
+        return options;
+    }, [canEdit, canDelete, entry, onEditStart, onDelete]);
+
+    return <ContextMenu options={menuOptions} />;
 }
 
 export default BatchList;

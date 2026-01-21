@@ -1,0 +1,153 @@
+/* ContextMenu - Floating action menu for mobile */
+
+.context-menu {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Three-dot trigger button - subtle and compact */
+.context-menu__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 16px;
+    min-width: 28px;
+    min-height: 24px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0.5;
+}
+
+.context-menu__trigger:hover {
+    background: rgba(255, 255, 255, 0.08);
+    opacity: 1;
+}
+
+.context-menu__trigger:active {
+    transform: scale(0.92);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.context-menu__trigger--active {
+    background: rgba(59, 130, 246, 0.15);
+    opacity: 1;
+}
+
+.context-menu__trigger:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.context-menu__dots {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    line-height: 1;
+}
+
+.context-menu__trigger:hover .context-menu__dots {
+    color: #e2e8f0;
+}
+
+.context-menu__trigger--active .context-menu__dots {
+    color: #3b82f6;
+}
+
+/* Floating popover menu */
+.context-menu__popover {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    min-width: 160px;
+    margin-top: 4px;
+    padding: 6px;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.4),
+        0 4px 10px rgba(0, 0, 0, 0.3);
+    animation: contextMenuFadeIn 0.15s ease-out;
+}
+
+@keyframes contextMenuFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Menu option - large touch target */
+.context-menu__option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px 14px;
+    min-height: 48px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.context-menu__option:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.context-menu__option:active {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Danger variant (for delete) */
+.context-menu__option--danger {
+    color: #ef4444;
+}
+
+.context-menu__option--danger:hover {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.context-menu__option--danger:active {
+    background: rgba(239, 68, 68, 0.25);
+}
+
+.context-menu__option-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.context-menu__option-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #e2e8f0;
+    white-space: nowrap;
+}
+
+.context-menu__option--danger .context-menu__option-label {
+    color: #f87171;
+}
+
+/* Separator (optional, for future use) */
+.context-menu__separator {
+    height: 1px;
+    margin: 6px 0;
+    background: #334155;
+}
