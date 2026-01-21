@@ -83,28 +83,44 @@
     pointer-events: none;
 }
 
-/* Last batch subtotal indicator */
-.big-display__last-batch {
+/* Stats row - Last weight | Batch count | Last subtotal */
+.big-display__stats {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 0.5rem;
+    gap: 1rem;
     margin-top: 0.5rem;
     padding-top: 0.5rem;
     border-top: 1px solid #334155;
+    flex-wrap: wrap;
 }
 
-.last-batch__label {
-    font-size: 0.65rem;
+.big-display__stat {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.stat__label {
+    font-size: 0.6rem;
     color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.05em;
 }
 
-.last-batch__value {
+.stat__value {
     font-family: 'Roboto Mono', monospace;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     font-weight: 600;
-    color: #3b82f6;
-    text-shadow: 0 0 8px rgba(59, 130, 246, 0.4);
+    color: #94a3b8;
+}
+
+.stat__value--count {
+    color: #cbd5e1;
+    font-size: 0.85rem;
+}
+
+.stat__value--subtotal {
+    color: var(--category-color, #10b981);
+    text-shadow: 0 0 6px color-mix(in srgb, var(--category-color, #10b981) 40%, transparent);
 }

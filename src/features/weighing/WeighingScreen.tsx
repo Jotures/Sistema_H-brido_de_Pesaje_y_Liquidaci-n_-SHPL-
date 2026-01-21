@@ -174,6 +174,16 @@ export function WeighingScreen({ onWeightSubmit }: WeighingScreenProps) {
                                     .filter(b => b.status === 'closed' && b.subtotal !== null)
                                     .slice(-1)[0]?.subtotal ?? null
                             }
+                            lastWeight={
+                                // Find the most recent weight entry
+                                (() => {
+                                    const allEntries = batches.flatMap(b => b.entries);
+                                    if (allEntries.length === 0) return null;
+                                    return allEntries[allEntries.length - 1]?.value ?? null;
+                                })()
+                            }
+                            batchCount={batches.filter(b => b.status === 'closed').length}
+                            categoryColor={activeCategory.color}
                         />
                     </div>
 
